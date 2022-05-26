@@ -1,0 +1,24 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const route = require("./Route/route")
+const { default: mongoose } = require('mongoose');
+const { Route } = require('express');
+const app = express();
+const multer= require("multer");
+
+
+app.use(bodyParser.json());
+app.use( multer().any())
+
+
+mongoose.connect("mongodb+srv://Aditya1998:aadi1998@cluster0.zl7lv.mongodb.net/OurProject-5?retryWrites=true&w=majority", {
+    useNewUrlParser: true
+})
+.then( () => console.log("MongoDb is connected"))
+.catch ( err => console.log(err) )
+
+app.use('/', route);
+
+
+app.listen(3000); 
+    console.log('Express app running on port ' + (3000))
