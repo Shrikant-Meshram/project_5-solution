@@ -21,7 +21,7 @@ const isValidString = function (value) {
 };
 
 const isValidTitle = function (title) {
-    return ["Mr", "Mrs", "Miss"].indexOf(title) !== -1;
+    return ["S", "XS","M","X", "L","XXL", "XL"].indexOf(title) !== -1;
   };
 
 
