@@ -16,11 +16,17 @@ const createUser = async function (req, res) {
            let data = req.body
       
     let files= req.files
+
+    
      
-        const { fname, lname, email, profileImage, phone, password, address, } = data
+        const { fname, lname, email, phone, password, address } = data
 
         if (!Validation.isValidRequestBody(data)) {
             return res.status(400).send({ status: false, msg: "please provide some data" })
+        }
+
+        if(!files || files.length == 0){
+            return res.status(400).send({status:false,msg:"file is required"})
         }
 
         if (!fname) {
@@ -57,9 +63,6 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "email address already registered." })
         }
 
-        // if (!profileImage) {
-        //     return res.status(400).send({ status: false, msg: "please provide profileImage." })
-        // }
 
         if (!phone) {
             return res.status(400).send({ status: false, msg: "please provide phone number." })
@@ -320,137 +323,6 @@ const getUser= async function(req, res) {
 }
 
 
-// const updateUser= async function (req, res)
-// {
-//     try{
-
-//         let data= req.body
-//         const userIdFromParams= req.params.userId
-//         const userIdFromToken= req.userId;
-        
-//         const{fname, lname, email, phone, password, address}= data
-
-//         const data= {}
-
-//         if (!Validation.isValidObjectId(userIdFromParams)) {
-//             return res.status(404).send({ status: false, msg:"userId is not valid" })
-//         }
-
-//         const userByuserId= await userModel.findById(userIdFromParams)
-
-//         if (!userByuserId) return res.status(404).send({ status: false, message: 'user not found..!!' });
-
-//       //  if (userIdFromToken != userIdFromParams) return res.status(403).send({status: false,message: "Unauthorized access..!!"});
-
-//         if (!Validation.isValidRequestBody(data)) {
-//             return res.status(400).send({ status: false, msg: "please provide some data" })
-//         }
-
-
-//         if (fname) 
-//         {
-//             if (!Validation.isValid(fname))  return res.status(400).send({ status: false, Message: "First name is required..!!" });
-//             data.fname = fname
-//         }
-      
-//         //===================================lname validation==========================================
-      
-//         if (lname) {
-//             if (!Validation.isValid(lname)) return res.status(400).send({ status: false, Message: "Last name is required..!!" });
-//             data.lname = lname
-//         }
-      
-//         //================================email validation==============================================
-      
-//         if (email)
-//          {
-//             if (!(Validation.isEmailValid(email.trim()))) return res.status(400).send({ status: false, msg: "Please provide a valid email..!!" });
-//             const isEmailUsed = await userModel.findOne({ email: email });
-//             if (isEmailUsed) return res.status(400).send({ status: false, msg: "email must be unique..!!" });
-//             data.email = email;
-//         }
-      
-//         //=======================profile pic upload and validation==========================
-      
-//         let saltRounds = 10;
-//         const files = req.files;
-      
-//         if (files && files.length > 0) 
-//         {
-//             const profilePic = await aws.uploadFile(files[0]);
-//             data.profileImage = profilePic;
-//         }
-      
-//         //===============================phone validation-========================================
-      
-//         if (phone)
-//         {
-      
-//             if (!(Validation.isPhoneValid(phone))) return res.status(400).send({ status: false, msg: "please provide a valid phone number..!!" });
-      
-//             const isPhoneUsed = await userModel.findOne({ phone: phone });
-//             if (isPhoneUsed) return res.status(400).send({ status: false, msg: "phone number must be unique..!!" });
-//             data.phone = phone;
-//         }
-      
-//         //======================================password validation-====================================
-      
-//         if (password) 
-//         {
-//             if (!Validation.isValid(password))  return res.status(400).send({ status: false, message: "password is required..!!" });
-//             const encryptPassword = await bcrypt.hash(password, saltRounds);
-//             data.password = encryptPassword;
-//         }
-      
-//         //========================================address validation=================================
-      
-//         if (address)
-//         {
-      
-//             if (address.shipping)
-//             {
-      
-//                 if (!Validation.isValid(address.shipping.street)) return res.status(400).send({ status: false, Message: "street name is required..!!" }); 
-//                 data["address.shipping.street"] = address.shipping.street;
-      
-//                 if (!Validation.isValid(address.shipping.city)) return res.status(400).send({ status: false, Message: "city name is required..!!" });
-      
-//                 data["address.shipping.city"] = address.shipping.city;
-      
-//                 if (!Validation.isValid(address.shipping.pincode)) return res.status(400).send({ status: false, Message: "pincode is required..!!" });
-                
-//                 data["address.shipping.pincode"] = address.shipping.pincode;
-//             }
-      
-//             if (address.billing)
-//              {
-//                 if (!Validation.isValid(address.billing.street)) return res.status(400).send({ status: false, Message: "Please provide street name in billing address..!!" });
-                
-//                 data["address.billing.street"] = address.billing.street;
-      
-//                 if (!Validation.isValid(address.billing.city)) return res.status(400).send({ status: false, Message: "Please provide city name in billing address..!!" });
-                
-//                 data["address.billing.city"] = address.billing.city
-      
-//                 if (!Validation.isValid(address.billing.pincode)) return res.status(400).send({ status: false, Message: "Please provide pincode in billing address..!!;" })
-                
-//                 data["address.billing.pincode"] = address.billing.pincode;
-//             }
-//         }
-      
-//         //=========================================update data=============================
-      
-//         const updatedUser = await userModel.findOneAndUpdate({ _id: userIdFromToken }, {$set: data}, { new: true });
-      
-//         return res.status(200).send({ status: true, message: "User profile updated", data: updatedUser });
-//     }
-//     catch(err)
-//     {
-//         console.log(err);
-//         return res.status(500).send({staus: false, message: err.message});
-//     }
-
-// }
 
 
 const updateUserDetails = async function (req, res) {
@@ -616,43 +488,7 @@ const updateUserDetails = async function (req, res) {
     }
 }
 
-const deleteProduct = async function (req, res) {
-    try {
-      let id = req.params.productId;
-  
-      if (!Validation.isValidObjectId(id)) {
-        return res.status(400).send({ status: false, message: `productId is invalid.` });
-      }
-  
-      let findProduct = await productModel.findOne({ _id: id });
-  
-      if (!findProduct) {
-        return res.status(400).send({ status: false, msg: "No such Product found" });
-      }
-  
-      const alreadyDeleted= await productModel.findOne({_id: id, isDeleted: true})
-  
-      if(alreadyDeleted) {
-        return res.status(400).send({ status: false, msg: `${alreadyDeleted.title} is already been deleted.` })
-      }
-  
-      
-      
-      let data = await Product.findOne({ _id: id });
-      if (data.isDeleted == false) {
-        let Update = await productModel.findOneAndUpdate(
-          { _id: id },
-          { isDeleted: true, deletedAt: Date() },
-          { new: true }
-        );
-        return res.status(200).send({status: true,message: "successfully deleted the product",data:Update});
-      } 
-  
-    } catch (err) {
-        console.log(err)
-      res.status(500).send({ status: false, Error: err.message });
-    }
-  };
+
 
 
 
