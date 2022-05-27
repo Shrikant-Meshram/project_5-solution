@@ -94,4 +94,62 @@ const createProduct = async function (req, res)
     }
 }
 
+const getProductsById = async (req, res) => {
+    try{
+      let productId = req.params.productId;
+  
+      //checking is product id is valid or not
+      if (!Validation.isValidObjectId(productId)){
+        return res.status(400).send({ status: false, message: 'Please provide valid productId' })
+      }
+    
+      const product = await productModel.findOne({ _id: productId, isDeleted:false})
+      if(!product) return res.status(404).send({ status: false, message:"No product found"})
+  
+      return res.status(200).send({ status: true, message: 'success', data: product})
+    } catch (err) {
+      res.status(500).send({ status: false, error: err.message })
+    }
+  }
+
+  const deleteProduct = async function (req, res) {
+    try {
+      let id = req.params.productId;
+  
+      if (!Validation.isValidObjectId(id)) {
+        return res.status(400).send({ status: false, message: `productId is invalid.` });
+      }
+  
+      let findProduct = await productModel.findOne({ _id: id });
+  
+      if (!findProduct) {
+        return res.status(400).send({ status: false, msg: "No such Product found" });
+      }
+  
+      const alreadyDeleted= await productModel.findOne({_id: id, isDeleted: true})
+  
+      if(alreadyDeleted) {
+        return res.status(400).send({ status: false, msg: `${alreadyDeleted.title} is already been deleted.` })
+      }
+  
+      
+      
+      let data = await productModel.findOne({ _id: id });
+      if (data.isDeleted == false) {
+        let Update = await productModel.findOneAndUpdate(
+          { _id: id },
+          { isDeleted: true, deletedAt: Date() },
+          { new: true }
+        );
+        return res.status(200).send({status: true,message: "successfully deleted the product",data:Update});
+      } 
+  
+    } catch (err) {
+        console.log(err)
+      res.status(500).send({ status: false, Error: err.message });
+    }
+  };
+
 module.exports.createProduct=createProduct;
+module.exports.getProductsById=getProductsById;
+module.exports.deleteProduct=deleteProduct;
