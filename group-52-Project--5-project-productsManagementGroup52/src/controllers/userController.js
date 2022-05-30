@@ -33,7 +33,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "please provide fname." })
         }
 
-        if (!Validation.isValid(fname)) {
+        if (!Validation.isValid(fname)) { 
             return res.status(400).send({ status: false, msg: "please provide valid fname." })
         }
 
@@ -96,7 +96,7 @@ const createUser = async function (req, res) {
         }
 
         const salt = await bcrypt.genSalt(10)
-        data.password= await bcrypt.hash(data.password, salt )
+        data.password= await bcrypt.hash(data.password, salt )  
 
 
 
@@ -263,7 +263,7 @@ const login= async function(req, res)
         // }
         let hashpassword=duplicateEmail.password
 
-       let hashed=await bcrypt.compare(password,hashpassword)
+       let hashed=await bcrypt.compare(password,hashpassword) 
 
        if(!hashed) {
         return res.status(400).send({ status: false, msg:"Please provide correct password" })

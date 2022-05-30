@@ -11,7 +11,7 @@ const loginCheck = async function(req, res, next) {
             return res.status(403).send({ status: false, message: `Missing authentication token in request` })
         }
        
-        let splitToken=token.split( " ")
+        let splitToken=token.split(" ")
 
         let decoded =jwt.verify(splitToken[1],secretKey)
 

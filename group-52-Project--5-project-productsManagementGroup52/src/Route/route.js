@@ -5,6 +5,7 @@ const router = express.Router()
 const UserController= require("../controllers/userController")
 const ProductController= require("../controllers/productController")
 const LoginAuth= require("../middleware/middle")
+const CartController= require("../controllers/cartController")
 
 router.post("/register",UserController.createUser)
 router.post("/login",UserController.login)
@@ -16,8 +17,14 @@ router.put("/user/:userId/profile", UserController.updateUserDetails)
 router.post("/products",ProductController.createProduct)
 router.get("/products/:productId",ProductController.getProductsById)
 router.delete("/products/:productId",ProductController.deleteProduct)
-router.get("/products",ProductController.getProducts)
-router.put("/products/:productId",ProductController.updateProductDetails)
+router.get("/products",ProductController.getByFilter)
+router.put("/products/:productId",ProductController.updateProduct)
+
+//***************************************CART APIS************************************************/
+router.post("/users/:userId/cart",CartController.createCart)
+
+
+
 
 
 
