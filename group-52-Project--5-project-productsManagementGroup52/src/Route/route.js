@@ -6,6 +6,8 @@ const UserController= require("../controllers/userController")
 const ProductController= require("../controllers/productController")
 const LoginAuth= require("../middleware/middle")
 const CartController= require("../controllers/cartController")
+const OrderController= require("../controllers/orderController")
+
 //***********************************USER APIS*******************************************************/
 router.post("/register",UserController.createUser)
 router.post("/login",UserController.login)
@@ -21,10 +23,15 @@ router.get("/products",ProductController.getByFilter)
 router.put("/products/:productId",ProductController.updateProduct)
 
 //***************************************CART APIS************************************************/
-router.post("/users/:userId/cart",LoginAuth.loginCheck, CartController.createCart)
+router.post("/users/:userId/cart", CartController.createCart)
 router.get("/users/:userId/cart",CartController.getCart)
 router.delete("/users/:userId/cart",CartController.deleteCart)
 router.put("/users/:userId/cart",CartController.updateCart)
+
+//****************************************ORDER APIS ***********************************/
+
+router.post("/users/:userId/orders", OrderController.createOrder)
+router.put("/users/:userId/orders", OrderController.updateOrder)
 
 
 
