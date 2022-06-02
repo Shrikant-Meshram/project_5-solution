@@ -98,7 +98,7 @@ const updateCart = async function (req, res) {
   
         const userId = req.params.userId
         let data = req.body
-        // let tokenId = req.userId
+         let tokenId = req.userId
   
         let { cartId, productId, removeProduct } = data
         
@@ -114,10 +114,10 @@ const updateCart = async function (req, res) {
         if (!validUser) {
             return res.status(404).send({ status: false, message: "User not present" })
         }
-         //Authorisation
-        // if (tokenId !== userId) {
-        //     return res.status(403).send({ status: false, message: "Unauthorized user" })
-        // }
+        // Authorisation
+        if (tokenId !== userId) {
+            return res.status(403).send({ status: false, message: "Unauthorized user" })
+        }
   
         // checking data in request body
   
@@ -228,6 +228,7 @@ const updateCart = async function (req, res) {
   
     }
     catch (err) {
+        console.log(err)
         return res.status(500).send({ status: false, message: err.message })
   
     }
@@ -247,9 +248,9 @@ const getCart = async function (req, res) {
 
         //    authroization 
 
-        // if (!(userId === jwtUserId)) {
-        //     return res.status(400).send({ status: false, msg: "unauthorized access" })
-        // }
+        if (!(userId === jwtUserId)) {
+            return res.status(400).send({ status: false, msg: "unauthorized access" })
+        }
 
         const checkCart = await cartModel.findOne({ userId: userId })
         if (!checkCart) {
@@ -284,9 +285,9 @@ const deleteCart = async function (req, res) {
             return res.status(404).send({ status: false, message: "No user found" })
         }
 
-    //     if (userIdFromToken != userIdFromParams) {
-    //       return res.status(403).send({status: false,message: "Unauthorized access.",});
-    //   }
+        if (userIdFromToken != userIdFromParams) {
+          return res.status(403).send({status: false,message: "Unauthorized access.",});
+      }
 
         const findCartById = await cartModel.findOne({ userId: userIdFromParams})
 

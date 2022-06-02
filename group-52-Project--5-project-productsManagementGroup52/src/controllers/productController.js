@@ -70,6 +70,28 @@ const createProduct = async function (req, res)
     if(currencyFormat != "₹"){
          return res.status(400).send({status:false, msg: "only indian currency ₹ accepted..!!"})
         };
+      
+      
+      
+        if(!availableSizes){
+            return res.status(400).send({status : false, message : "Available sizes must be provided"})
+        }
+        else{
+            if(!Validation.isValid(availableSizes)){
+                return res.status(400).send({status : false, message : "please provide valid input"})
+            }
+
+            let sizes = availableSizes.toUpperCase().split(",")
+            let arr = ["S", "XS","M","X", "L","XXL", "XL"]
+
+            if (!(arr)) {
+                return res.status(400).send({status : false, message : "xyz"})
+            }
+
+           
+            data['availableSizes'] = sizes
+            
+        }
 
 
     if (files.length > 0) 
@@ -79,21 +101,28 @@ const createProduct = async function (req, res)
 
         data.productImage = profileImages;
 
-       data.availableSizes = JSON.parse(availableSizes);
+     //  data.availableSizes = JSON.parse(availableSizes);
 
         if(!data.productImage) {
             return res.status(400).send({status:false, msg: "productImage required..!!"})
         };
 
-        const deleted= await productModel.findById({_id:productId})
+        if (!Validation.isValid(availableSizes)) return res.status(400).send({ status: false, msg: "availableSizes feild is requried" })
+        let array = availableSizes.split(",").map(x => x.trim()) //this will split the available sizes and give it an array
+
+        for (let i = 0; i < array.length; i++) {
+            if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
+                return res.status(400).send({ status: false, msg: `Available sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"].join(',')}` })
+            }
+        }
+     
+
+      
 
         
 
         const saveData = await productModel.create(data);
 
-        if(deleted.isDeleted==true) {
-            return res.status(400).send({status:true, data:saveData})
-        }
 
 
        
@@ -125,48 +154,60 @@ const getProductsById = async (req, res) => {
   }
 
 
-  const getByFilter = async (req, res) => {
+  const getByFilter= async (req, res) => {
     try {
+        let filterQuery = req.query;
+        let { size, name, priceGreaterThan, priceLessThan, priceSort, isFreeShipping } = filterQuery;
 
-        let querySize = req.query.size
-        let queryName = req.query.name
-        let quarypriceGreaterThan = req.query.priceGreaterThan
-        let quarypriceLessThan = req.query.priceLessThan
+        let query = {}
+        query['isDeleted'] = false;
 
-        let filterquery = { isDeleted: false }
-
-        if (Validation.isValid(querySize)) {
-            let availableSizes = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-            if (!availableSizes.includes(querySize)) return res.status(400).send({ status: false, message: "availableSizes should be from [S, XS,M,X, L,XXL, XL]" })
-            filterquery.availableSizes = querySize
+        if (isFreeShipping) {
+            if (typeof isFreeShipping !== "boolean") { return res.status(400).send({ status: false, message: "value must be in true or false" }) }
+            query['isFreeShipping'] = isFreeShipping
         }
 
-
-        if (Validation.isValid(queryName)) {
-            filterquery.title = queryName
+        if (size) {
+            let array = size.split(",").map(x => x.trim())
+            query['availableSizes'] = array
+        }
+        if (name) {
+            name = name.trim()
+            const regexName = new RegExp(name, "i")
+            query['title'] = { $regex: regexName }
+        }
+        if (priceGreaterThan) {
+            query['price'] = { $gt: priceGreaterThan }
+        }
+        if (priceLessThan) {
+            query['price'] = { $lt: priceLessThan }
+        }
+        if (priceGreaterThan && priceLessThan) {
+            query['price'] = { '$gt': priceGreaterThan, '$lt': priceLessThan }
         }
 
-    
-            if (Validation.isValid(quarypriceGreaterThan) && Validation.isValid(quarypriceLessThan)) {
-                if (isNaN(quarypriceGreaterThan) && isNaN(quarypriceLessThan)) {
-                    res.status(400).send({ status: false, message: "plase enter number" })
-                }
-                filterquery['price'] = { $gt: quarypriceGreaterThan, $lt: quarypriceLessThan }
+        if (priceSort) {
+            if (priceSort == -1 || priceSort == 1) {
+                query['priceSort'] = priceSort
+            } else {
+                return res.status(400).send({ status: false, message: "Please provide valid value of priceSort" })
             }
-
-
-        let detailsByFilter = await productModel.find(filterquery).sort({price:1})
-        if(detailsByFilter.length==0){
-            res.status(404).send({status:false,Message:"No such a products available "})
-        }else{
-        
-       return res.status(200).send({ status: true, message: "data fetch successfully", data: detailsByFilter })
         }
-        
+
+        let getAllProducts = await productModel.find(query).sort({ price: query.priceSort })
+        const countproducts = getAllProducts.length
+        if (!(countproducts > 0)) {
+            return res.status(404).send({ status: false, msg: "No products found" })
+        }
+        return res.status(200).send({ status: true, message: `${countproducts} Products Found`, body: getAllProducts });
+
     } catch (err) {
-        return res.status(500).send({ status: false, message: err.message })
+        console.log(err)
+        return res.status(500).send({ status: false, msg: err.message })
+
     }
 }
+
 
   const deleteProduct = async function (req, res) {
     try {
@@ -179,13 +220,13 @@ const getProductsById = async (req, res) => {
       let findProduct = await productModel.findOne({ _id: id });
   
       if (!findProduct) {
-        return res.status(400).send({ status: false, msg: "No such Product found" });
+        return res.status(404).send({ status: false, msg: "No such Product found" });
       }
   
       const alreadyDeleted= await productModel.findOne({_id: id, isDeleted: true})
   
       if(alreadyDeleted) {
-        return res.status(400).send({ status: false, msg: `${alreadyDeleted.title} is already been deleted.` })
+        return res.status(404).send({ status: false, msg: `${alreadyDeleted.title} is already been deleted.` })
       }
   
       

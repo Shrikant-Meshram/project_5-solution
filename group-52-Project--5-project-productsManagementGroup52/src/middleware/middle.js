@@ -8,7 +8,7 @@ const loginCheck = async function(req, res, next) {
 
         let token = req.header("Authorization","Bearer Token")
         if (!token) {
-            return res.status(403).send({ status: false, message: `Missing authentication token in request` })
+            return res.status(401).send({ status: false, message: `Missing authentication token in request` })
         }
        
         let splitToken=token.split(" ")
@@ -16,7 +16,7 @@ const loginCheck = async function(req, res, next) {
         let decoded =jwt.verify(splitToken[1],secretKey)
 
         if (!decoded) {
-            return res.status(403).send({ status: false, message: `Invalid authentication token in request` })
+            return res.status(401).send({ status: false, message: `Invalid authentication token in request` })
         }
 
         req.userId= decoded.userId

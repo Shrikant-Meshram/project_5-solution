@@ -67,15 +67,11 @@ const createUser = async function (req, res) {
         if (!phone) {
             return res.status(400).send({ status: false, msg: "please provide phone number." })
         }
-
-        if (!validator.isNumeric(phone)) {
-            return res.status(400).send({ status: false, msg: "please provide valid phone number." })  // test with indian number
+        if (!/^(?:(?:\+|0{0,2})91(\s*|[\-])?|[0]?)?([6789]\d{2}([ -]?)\d{3}([ -]?)\d{4})$/.test(phone)) {
+            return  res.status(400).send({ status: false, msg: "It's not a valid mobile number" })
         }
 
-        if (phone.length != 10) {
-            return res.status(400).send({ status: false, msg: "please provide valid 10 digit phone number." })
-        }
-
+       
         const uniquePhone = await userModel.findOne({ phone: phone })
 
         if (uniquePhone) {
@@ -294,17 +290,30 @@ const getUser= async function(req, res) {
 
     try{
         const fromParams= req.params.userId
-        const usetoken=req.fromParams
+        const usetoken=req.userId
         
 
-     
+        if (usetoken )
 
         if(!Validation.isValidObjectId(fromParams)) {
             return res.status(400).send({ status: false, msg:"Please provide valid id." })
         }
 
+        
+       const userPresent= await userModel.findOne({_id: fromParams}) 
+       if (!userPresent) {
+         return res.status(404).send({ status: false, message:"This user does not exist" })    
+   }
+
+        if(fromParams != usetoken) {
+            return res.status(403).send({ status: false, msg:"unauthorized access" })
+        }
+
        const userExist= await userModel.findOne({_id:fromParams}) 
 
+       
+
+    
         if(!userExist) {
             return res.status(404).send({ status: false, msg:"user not found" })
         }
@@ -317,7 +326,7 @@ const getUser= async function(req, res) {
 
     }catch(err) {
 
-        res.status(500).send({status:false, msg: err.msg  });
+        res.status(500).send({status:false, msg: err.message  });
     }
 
 }
@@ -348,9 +357,9 @@ const updateUserDetails = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please provide user's details to update." })
         }
 
-        // if (findUserData._id != userIdFromToken) {
-        //     return res.status(401).send({ status: false, message: "You Are Not Authorized!!" })
-        // }
+        if (findUserData._id != userIdFromToken) {
+            return res.status(401).send({ status: false, message: "You Are Not Authorized!!" })
+        }
 
         let { fname, lname, email, phone, password, address, profileImage } =userDetails
 
@@ -375,7 +384,7 @@ const updateUserDetails = async function (req, res) {
             const checkEmailFromDb = await userModel.findOne({ email :userDetails.email})
         
             if (checkEmailFromDb) 
-            return res.status(400).send({ status: false, message: `emailId is Exists. Please try another email Id.` })
+            return res.status(400).send({ status: false, message: `emailId Exists. Please try another email Id.` })
         }
 
     
@@ -413,25 +422,29 @@ const updateUserDetails = async function (req, res) {
         }
         
         if (address) {
+
+            let userAddress1 =  JSON.stringify(userDetails.address)
+            userDetails.address=userAddress1
+
             
             let userAddress=JSON.parse(userDetails.address)
             userDetails.address=userAddress
     
         if(userAddress.shipping){
             if(userAddress.shipping.street){
-            if (!validator.isValid(userAddress.shipping.street)) {
+            if (!Validation.isValid(userAddress.shipping.street)) {
                 return res.status(400).send({ status: false, message: "Please provide address shipping street" });
             }
             userDetails.address.shipping.street = userAddress.shipping.street
         }
             if(userAddress.shipping.city){
-            if (!validator.isValid(userAddress.shipping.city)) {
+            if (!Validation.isValid(userAddress.shipping.city)) {
                 return res.status(400).send({ status: false, message: "Please provide address shipping city" });
             }
             userDetails.address.shipping.city = userAddress.shipping.city
         }
             if(userAddress.shipping.pincode){
-            if (!validator.isValid(userAddress.shipping.pincode)) {
+            if (!Validation.isValid(userAddress.shipping.pincode)) {
                 return res.status(400).send({ status: false, message: "Please provide address shipping pincode" });
             }
             userDetails.address.shipping.pincode =userAddress.shipping.pincode
@@ -440,19 +453,19 @@ const updateUserDetails = async function (req, res) {
 
         if(userAddress.billing){
             if(userAddress.billing.street){
-            if (!validator.isValid(userAddress.billing.street)) {
+            if (!Validation.isValid(userAddress.billing.street)) {
                 return res.status(400).send({ status: false, message: "Please provide address billing street" });
             }
             userDetails.address.billing.street = userAddress.billing.street
         }
             if(userAddress.billing.city){
-            if (!validator.isValid(userAddress.billing.city)) {
+            if (!Validation.isValid(userAddress.billing.city)) {
                 return res.status(400).send({ status: false, message: "Please provide address billing city" });
             }
             userDetails.address.billing.city = userAddress.billing.city
         }
             if(userAddress.billing.pincode){
-            if (!validator.isValid(userAddress.billing.pincode)) {
+            if (!Validation.isValid(userAddress.billing.pincode)) {
                 return res.status(400).send({ status: false, message: "Please provide address billing pincode" });
             }
             userDetails.address.billing.pincode =userAddress.billing.pincode

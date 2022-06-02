@@ -12,21 +12,21 @@ const OrderController= require("../controllers/orderController")
 router.post("/register",UserController.createUser)
 router.post("/login",UserController.login)
 router.get("/user/:userId/profile",LoginAuth.loginCheck, UserController.getUser)
-router.put("/user/:userId/profile", UserController.updateUserDetails)
+router.put("/user/:userId/profile",LoginAuth.loginCheck, UserController.updateUserDetails)
 
 //*************************************PRODUCT APIS*********************************************/
 
-router.post("/products", LoginAuth.loginCheck, ProductController.createProduct)
+router.post("/products", ProductController.createProduct)
 router.get("/products/:productId",ProductController.getProductsById)
 router.delete("/products/:productId",ProductController.deleteProduct)
 router.get("/products",ProductController.getByFilter)
 router.put("/products/:productId",ProductController.updateProduct)
 
 //***************************************CART APIS************************************************/
-router.post("/users/:userId/cart", CartController.createCart)
-router.get("/users/:userId/cart",CartController.getCart)
-router.delete("/users/:userId/cart",CartController.deleteCart)
-router.put("/users/:userId/cart",CartController.updateCart)
+router.post("/users/:userId/cart",LoginAuth.loginCheck, CartController.createCart)
+router.get("/users/:userId/cart",LoginAuth.loginCheck, CartController.getCart)
+router.delete("/users/:userId/cart",LoginAuth.loginCheck, CartController.deleteCart)
+router.put("/users/:userId/cart",LoginAuth.loginCheck, CartController.updateCart)
 
 //****************************************ORDER APIS ***********************************/
 
