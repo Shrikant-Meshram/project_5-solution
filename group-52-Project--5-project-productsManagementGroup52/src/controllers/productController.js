@@ -154,57 +154,95 @@ const getProductsById = async (req, res) => {
   }
 
 
-  const getByFilter= async (req, res) => {
-    try {
-        let filterQuery = req.query;
-        let { size, name, priceGreaterThan, priceLessThan, priceSort, isFreeShipping } = filterQuery;
-
-        let query = {}
-        query['isDeleted'] = false;
-
-        if (isFreeShipping) {
-            if (typeof isFreeShipping !== "boolean") { return res.status(400).send({ status: false, message: "value must be in true or false" }) }
-            query['isFreeShipping'] = isFreeShipping
+  const getByFilter = async (req,res)=>{
+    try{
+        let data = req.query 
+        let filter = {
+            isDeleted : false
         }
 
-        if (size) {
-            let array = size.split(",").map(x => x.trim())
-            query['availableSizes'] = array
-        }
-        if (name) {
-            name = name.trim()
-            const regexName = new RegExp(name, "i")
-            query['title'] = { $regex: regexName }
-        }
-        if (priceGreaterThan) {
-            query['price'] = { $gt: priceGreaterThan }
-        }
-        if (priceLessThan) {
-            query['price'] = { $lt: priceLessThan }
-        }
-        if (priceGreaterThan && priceLessThan) {
-            query['price'] = { '$gt': priceGreaterThan, '$lt': priceLessThan }
+        let {name, size, priceSort, priceGreaterThan, priceLessThan} = data
+
+        if(name){
+            if(!Validation.isValid(name)){
+                return res.status(400).send({status : false, message : "the name is missing in length"})
+            }
+            
+          
+
+            filter['title'] = { $regex: name, $options:"i" }
         }
 
-        if (priceSort) {
-            if (priceSort == -1 || priceSort == 1) {
-                query['priceSort'] = priceSort
-            } else {
-                return res.status(400).send({ status: false, message: "Please provide valid value of priceSort" })
+        if(size){
+            if(!Validation.isValid(size)){
+                return res.status(400).send({status : false, message : "the size is missing in lenght"})
+            }
+    
+            filter['availableSizes'] = size.toUpperCase()
+        }
+        
+        if(priceGreaterThan){
+            if(!Validation.isValid(priceGreaterThan)){
+                return res.status(400).send({status : false, messsage : "Price greater than must have some length"})
+            }
+
+            if(isNaN(priceGreaterThan)){
+                return res.status(400).send({status : false, message : "price greater than must be number"})
+            }
+
+            filter['price'] = {
+                '$gt' : priceGreaterThan
             }
         }
 
-        let getAllProducts = await productModel.find(query).sort({ price: query.priceSort })
-        const countproducts = getAllProducts.length
-        if (!(countproducts > 0)) {
-            return res.status(404).send({ status: false, msg: "No products found" })
+        if(priceLessThan){
+            if(!Validation.isValid(priceLessThan)){
+                return res.status(400).send({status : false, messsage : "priceLessThan must have some length"})
+            }
+
+            if(isNaN(priceLessThan)){
+                return res.status(400).send({status : false, message : "priceLessThan must be number"})
+            }
+
+            filter['price'] = {
+                '$lt' : priceLessThan
+            }
         }
-        return res.status(200).send({ status: true, message: `${countproducts} Products Found`, body: getAllProducts });
 
-    } catch (err) {
-        console.log(err)
-        return res.status(500).send({ status: false, msg: err.message })
+        if(priceLessThan && priceGreaterThan){
+            filter['price'] = { '$lt' : priceLessThan, '$gt' : priceGreaterThan}
+        }
 
+       if(priceSort){
+            if(priceSort != 1 || priceSort != -1){
+                return res.status(400).send({status : false, message : "Price sort only takes 1 or -1 as a value" })
+            }
+    
+
+            let filterProduct = await product.find(filter).sort({price: priceSort})
+    
+            if(filterProduct.length>0){
+                return res.status(200).send({status : false, message : "Success", data : filterProduct})
+            }
+            else{
+                return res.status(404).send({status : false, message : "No products found with this query"})
+            }
+        } 
+        else{
+            let findProduct = await productModel.find(filter)
+        
+            if(findProduct.length>0){
+                return res.status(200).send({status : false, message : "Success", data : findProduct})
+            }
+            else{
+                return res.status(404).send({status : false, message : "No products found with this query"})
+            }
+        }
+
+    }
+    catch (error) {
+        console.log(error)
+        return res.status(500).send({ status: false, message: error.message })      
     }
 }
 

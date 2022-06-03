@@ -18,19 +18,10 @@ const createOrder = async (req, res) => {
             return res.status(400).send({ status: false, message: "Enter valid UserId" })
         }
 
-        // if (req.decodedToken.UserId = Userid) {
-        //     let user = await userModel.findById(Userid)
-        //     if (!user) {
-        //         return res.status(400).send({ status: false, message: "user is not present" })
-        //     }
-
             let cartDeatils = await cartModel.findOne({ userId: Userid })
 
             
-            // if (cartDeatils) {
-            //     return res.status(400).send({ status: false, message:"User already exists" })
-            // }
-        
+         
 
             data.userId = Userid   
         
@@ -55,10 +46,7 @@ const createOrder = async (req, res) => {
             return res.status(201).send({ status: true, message: "order created succefully", data: order })
 
 
-    //    }
-        //  else {
-        //     return res.status(403).send({ status: false, message: "authorizatin denied" })
-        // }
+    
 
     } catch (err) {
         console.log(err)
