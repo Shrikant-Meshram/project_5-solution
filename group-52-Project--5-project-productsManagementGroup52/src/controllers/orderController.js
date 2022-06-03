@@ -92,9 +92,7 @@ const updateOrder= async function (req,res) {
         return res.status(400).send({ status: false, message:"please provide a status" }) 
       }
 
-    //   if (!['pending', 'completed', 'cancelled'].status){    // check during testing
-    //     return res.status(404).send({ status: false, message:"please provide a status" }) 
-    //   }
+   
 
     if (!Validation.isValid(status)){ 
         return res.status(400).send({ status: false, message:"please provide a valid status" }) 
@@ -103,9 +101,9 @@ const updateOrder= async function (req,res) {
     if(orderBelong.status== "completed") {
         return res.status(400).send({ status: false, message:"oreder already completed, cannot update" }) 
     }
-    // if(orderBelong.status== "cancelled") {
-    //     return res.status(400).send({ status: false, message:"oreder already completed, cannot update" }) 
-    // }
+    if(orderBelong.status== "cancelled") {
+        return res.status(400).send({ status: false, message:"oreder already completed, cannot update" }) 
+    }
 
     if (orderBelong.status=="pending") {
         const updateOrder= await orderModel.findOneAndUpdate({_id: orderId}, {$set:{status:status}}, {new:true})

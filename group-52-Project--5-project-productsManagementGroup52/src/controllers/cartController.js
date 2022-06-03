@@ -172,9 +172,9 @@ const updateCart = async function (req, res) {
   
         let index = items.indexOf(productArr[0])
   
-        // if(!removeProduct){
-        //     return res.status(400).send({ status: false, message: "remove Product is a required field" })
-        // }
+        if(!removeProduct){
+            return res.status(400).send({ status: false, message: "remove Product is a required field" })
+        }
   
         if (!Validation.isValid(removeProduct)) {
             return res.status(400).send({ status: false, message: "Please enter removeProduct is missing in length" })
@@ -209,20 +209,7 @@ const updateCart = async function (req, res) {
             validCart.save()
   
         }
-        if (removeProduct == 2) {
-          
-            validCart.items[index].quantity -= 2
-            validCart.totalPrice = (validCart.totalPrice - validProduct.price).toFixed(2)
-            
-            if (validCart.items[index].quantity == 0) {
-                validCart.items.splice(index,1)
-  
-            }
-            validCart.totalItems = validCart.items.length
-  
-            validCart.save()
-  
-        }
+       
         
         return res.status(200).send({ status: true, data: validCart })
   
