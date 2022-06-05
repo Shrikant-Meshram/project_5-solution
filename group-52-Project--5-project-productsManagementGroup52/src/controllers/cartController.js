@@ -184,7 +184,7 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, message: "RemoveProduct field can have only 0 or 1 value" })
         }
   
-  
+  if(removeProduct)
         if (removeProduct == 0) {
             
             validCart.totalPrice = (validCart.totalPrice - (validProduct.price * validCart.items[index].quantity)).toFixed(2)

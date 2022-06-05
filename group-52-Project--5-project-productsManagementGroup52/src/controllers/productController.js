@@ -30,7 +30,7 @@ const createProduct = async function (req, res)
       
 
         if(!Validation.isValid(title)){
-             return res.status(400).send({status:false, msg:"title required..!!"})
+             return res.status(400).send({status:false, msg:"please enter valid title ..!!"})
         };
 
        let duplicateTitle = await productModel.findOne({title:title});
@@ -46,7 +46,7 @@ const createProduct = async function (req, res)
     };
 
     if(!Validation.isValid(description)){
-        return res.status(400).send({status:false, msg:"description required..!!"})
+        return res.status(400).send({status:false, msg:"please enter valid  description..!!"})
     };
 
 
@@ -85,7 +85,7 @@ const createProduct = async function (req, res)
             let arr = ["S", "XS","M","X", "L","XXL", "XL"]
 
             if (!(arr)) {
-                return res.status(400).send({status : false, message : "xyz"})
+                return res.status(400).send({status : false, message : "plase enter valid size"})
             }
 
            
