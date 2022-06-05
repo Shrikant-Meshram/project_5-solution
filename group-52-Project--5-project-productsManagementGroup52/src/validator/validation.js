@@ -24,9 +24,13 @@ const isValidTitle = function (title) {
     return ["S", "XS","M","X", "L","XXL", "XL"].indexOf(title) !== -1;
   };
 
+  const isValidStatus = function(status) {
+    return ['pending', 'completed', 'cancelled'].indexOf(status) !== -1
+}
 
 
 
 
 
-module.exports= {isValid, isValidRequestBody, isValidObjectId, isValidString, isValidTitle}
+
+module.exports= {isValid, isValidRequestBody, isValidObjectId, isValidString, isValidTitle,isValidStatus}

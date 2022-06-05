@@ -30,8 +30,8 @@ router.put("/users/:userId/cart",LoginAuth.loginCheck, CartController.updateCart
 
 //****************************************ORDER APIS ***********************************/
 
-router.post("/users/:userId/orders", OrderController.createOrder)
-router.put("/users/:userId/orders", OrderController.updateOrder)
+router.post("/users/:userId/orders",LoginAuth.loginCheck, OrderController.createOrder)
+router.put("/users/:userId/orders",LoginAuth.loginCheck, OrderController.updateOrder)
 
 
 
